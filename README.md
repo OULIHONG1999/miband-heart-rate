@@ -71,4 +71,27 @@ Features of the GUI version:
 - Real-time heart rate display with color coding (green=normal, orange=high, red=very high)
 - Sensor contact status indicator
 - Draggable window (click and drag anywhere in the window)
-- Automatically positions to the bottom-right corner of the screen
+- Control buttons appear only when mouse hovers over the window
+
+### GUI版本使用说明
+
+1. 程序启动后会自动在屏幕右下角显示一个半透明黑色的悬浮窗口
+2. 窗口默认置顶显示，实时显示心率数值和传感器状态
+3. 心率数值根据数值大小显示不同颜色：
+   - 绿色：心率正常（< 80）
+   - 橙色：心率偏高（80-100）
+   - 红色：心率过高（> 100）
+4. 窗口控制按钮默认隐藏，将鼠标悬停在窗口上时会显示：
+   - 左侧按钮用于切换窗口置顶状态
+   - 右侧"×"按钮用于关闭程序
+5. 可以在窗口任意位置点击并拖动来移动窗口位置
+6. 拖动后窗口会保持在放置的位置，不会自动回位
+
+### 使用前准备
+
+1. 确保电脑蓝牙已开启
+2. 在小米运动健康App中开启"运动心率广播"功能：
+   - 打开小米运动健康App
+   - 进入设备设置
+   - 找到"心率广播"选项并开启
+3. 确保手环与电脑距离适中（建议在1米以内）
