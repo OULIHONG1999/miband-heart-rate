@@ -1,5 +1,3 @@
-#![feature(never_type)]
-
 use std::error::Error;
 
 use bluest::{btuuid::bluetooth_uuid_from_u16, Adapter, Device, Uuid};
@@ -33,12 +31,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         };
 
-        let Err(err) = handle_device(&adapter, &device).await;
-        println!("Connection error: {err:?}");
+        match handle_device(&adapter, &device).await {
+            Ok(()) => println!("Device disconnected"),
+            Err(err) => println!("Connection error: {err:?}"),
+        }
     }
 }
 
-async fn handle_device(adapter: &Adapter, device: &Device) -> Result<!, Box<dyn Error>> {
+async fn handle_device(adapter: &Adapter, device: &Device) -> Result<(), Box<dyn Error>> {
     // Connect
     if !device.is_connected().await {
         println!("Connecting device: {}", device.id());
@@ -76,5 +76,5 @@ async fn handle_device(adapter: &Adapter, device: &Device) -> Result<!, Box<dyn 
         }
         println!("HeartRateValue: {heart_rate_value}, SensorContactDetected: {sensor_contact:?}");
     }
-    Err("No longer heart rate notify".into())
+    Ok(())
 }

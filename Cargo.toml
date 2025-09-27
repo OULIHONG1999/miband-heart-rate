@@ -11,3 +11,9 @@ repository = "https://github.com/Tnze/miband-heart-rate"
 tokio = { version = "1.45.1", features = ["macros", "rt-multi-thread"] }
 bluest = "0.6.8"
 futures-lite = "2.6.0"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+# This project also includes a Python implementation in miband_heart_rate.py
+# The Python version provides the same functionality with easier setup
