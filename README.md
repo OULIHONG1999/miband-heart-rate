@@ -51,3 +51,24 @@ This project also includes a Python version implemented with `bleak` library. To
    ```
 
 The Python version provides the same functionality as the Rust version but with broader compatibility and easier setup.
+
+## Python GUI version
+
+There's also a GUI version using PyQt6 that displays heart rate in a frameless window:
+
+1. Install required dependencies (including PyQt6):
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Run the GUI version:
+   ```bash
+   python miband_heart_rate_gui.py
+   ```
+
+Features of the GUI version:
+- Frameless window that stays on top
+- Real-time heart rate display with color coding (green=normal, orange=high, red=very high)
+- Sensor contact status indicator
+- Draggable window (click and drag anywhere in the window)
+- Automatically positions to the bottom-right corner of the screen
