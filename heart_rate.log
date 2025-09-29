@@ -32,3 +32,7 @@
 2025-09-28 15:36:22,357 - MiBandHeartRateMonitor - INFO - 找到设备: Xiaomi Smart Band 10 5DC0 [C6:E2:3B:BE:F3:87]
 2025-09-28 15:36:25,406 - MiBandHeartRateMonitor - INFO - 成功连接到设备: C6:E2:3B:BE:F3:87
 2025-09-28 15:36:25,447 - MiBandHeartRateMonitor - INFO - 开始监听心率数据
+2025-09-29 11:44:57,399 - MiBandHeartRateMonitor - INFO - 开始扫描心率设备
+2025-09-29 11:45:02,506 - MiBandHeartRateMonitor - INFO - 找到设备: Xiaomi Smart Band 10 5DC0 [C6:E2:3B:BE:F3:87]
+2025-09-29 11:45:06,284 - MiBandHeartRateMonitor - INFO - 成功连接到设备: C6:E2:3B:BE:F3:87
+2025-09-29 11:45:06,324 - MiBandHeartRateMonitor - INFO - 开始监听心率数据
