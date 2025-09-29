@@ -1,0 +1,34 @@
+2025-09-28 15:22:03,749 - MiBandHeartRateMonitor - INFO - 开始扫描心率设备
+2025-09-28 15:22:12,260 - MiBandHeartRateMonitor - INFO - 成功连接到设备: C6:E2:3B:BE:F3:87
+2025-09-28 15:22:12,300 - MiBandHeartRateMonitor - INFO - 开始监听心率数据
+2025-09-28 15:28:07,924 - MiBandHeartRateMonitor - INFO - 开始扫描心率设备
+2025-09-28 15:31:23,287 - MiBandHeartRateMonitor - INFO - 开始扫描心率设备
+2025-09-28 15:31:28,359 - MiBandHeartRateMonitor - INFO - 未找到已连接的心率设备，开始深度扫描
+2025-09-28 15:31:38,384 - MiBandHeartRateMonitor - WARNING - 未找到心率设备
+2025-09-28 15:31:38,384 - MiBandHeartRateMonitor - ERROR - 连接异常: 未找到心率设备
+2025-09-28 15:31:43,399 - MiBandHeartRateMonitor - INFO - 开始扫描心率设备
+2025-09-28 15:31:48,439 - MiBandHeartRateMonitor - INFO - 未找到已连接的心率设备，开始深度扫描
+2025-09-28 15:31:58,462 - MiBandHeartRateMonitor - WARNING - 未找到心率设备
+2025-09-28 15:31:58,462 - MiBandHeartRateMonitor - ERROR - 连接异常: 未找到心率设备
+2025-09-28 15:32:03,468 - MiBandHeartRateMonitor - INFO - 开始扫描心率设备
+2025-09-28 15:32:08,471 - MiBandHeartRateMonitor - INFO - 未找到已连接的心率设备，开始深度扫描
+2025-09-28 15:32:18,497 - MiBandHeartRateMonitor - WARNING - 未找到心率设备
+2025-09-28 15:32:18,497 - MiBandHeartRateMonitor - ERROR - 连接异常: 未找到心率设备
+2025-09-28 15:32:23,498 - MiBandHeartRateMonitor - INFO - 开始扫描心率设备
+2025-09-28 15:32:28,514 - MiBandHeartRateMonitor - INFO - 未找到已连接的心率设备，开始深度扫描
+2025-09-28 15:32:38,537 - MiBandHeartRateMonitor - WARNING - 未找到心率设备
+2025-09-28 15:32:38,537 - MiBandHeartRateMonitor - ERROR - 连接异常: 未找到心率设备
+2025-09-28 15:32:43,539 - MiBandHeartRateMonitor - INFO - 开始扫描心率设备
+2025-09-28 15:32:48,567 - MiBandHeartRateMonitor - INFO - 未找到已连接的心率设备，开始深度扫描
+2025-09-28 15:32:58,604 - MiBandHeartRateMonitor - WARNING - 未找到心率设备
+2025-09-28 15:32:58,605 - MiBandHeartRateMonitor - ERROR - 连接异常: 未找到心率设备
+2025-09-28 15:33:03,606 - MiBandHeartRateMonitor - INFO - 开始扫描心率设备
+2025-09-28 15:33:08,626 - MiBandHeartRateMonitor - INFO - 未找到已连接的心率设备，开始深度扫描
+2025-09-28 15:33:18,659 - MiBandHeartRateMonitor - WARNING - 未找到心率设备
+2025-09-28 15:33:18,659 - MiBandHeartRateMonitor - ERROR - 连接异常: 未找到心率设备
+2025-09-28 15:35:48,273 - MiBandHeartRateMonitor - INFO - 手动重连请求已发送
+2025-09-28 15:36:14,901 - MiBandHeartRateMonitor - INFO - 程序正在关闭
+2025-09-28 15:36:17,270 - MiBandHeartRateMonitor - INFO - 开始扫描心率设备
+2025-09-28 15:36:22,357 - MiBandHeartRateMonitor - INFO - 找到设备: Xiaomi Smart Band 10 5DC0 [C6:E2:3B:BE:F3:87]
+2025-09-28 15:36:25,406 - MiBandHeartRateMonitor - INFO - 成功连接到设备: C6:E2:3B:BE:F3:87
+2025-09-28 15:36:25,447 - MiBandHeartRateMonitor - INFO - 开始监听心率数据

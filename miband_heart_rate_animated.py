@@ -2,10 +2,11 @@ import sys
 import asyncio
 import struct
 import logging
+import math
 from bleak import BleakClient, BleakScanner
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QPushButton, QHBoxLayout
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QThread, QPoint
-from PyQt6.QtGui import QFont, QPalette, QColor, QCursor
+from PyQt6.QtGui import QFont, QPalette, QColor, QCursor, QPainter, QPen, QBrush
 
 # 配置日志
 logging.basicConfig(
@@ -38,6 +39,7 @@ class HeartRateWorker(QThread):
         self.retry_count = 0
         self.max_retries = 5
         self.manual_reconnect_requested = False
+        self.full_scan_requested = False  # 添加完全扫描请求标志
         self.last_device_address = None  # 记录最后连接的设备地址
 
     def run(self):
@@ -51,6 +53,13 @@ class HeartRateWorker(QThread):
         """请求手动重连设备"""
         logger.info("手动重连请求已发送")
         self.manual_reconnect_requested = True
+        self.full_scan_requested = False
+        
+    def request_full_scan(self):
+        """请求完全重新扫描设备"""
+        logger.info("完全扫描请求已发送")
+        self.full_scan_requested = True
+        self.manual_reconnect_requested = False
 
     async def _main_loop(self):
         """主循环，负责设备扫描、连接和重连逻辑"""
@@ -61,7 +70,12 @@ class HeartRateWorker(QThread):
                 # 记录异常信息到日志
                 logger.error(f"连接异常: {str(e)}")
                 
-                if self.manual_reconnect_requested:
+                if self.full_scan_requested:
+                    # 完全扫描请求处理
+                    self.connection_error.emit("正在重新扫描设备...")
+                    self.full_scan_requested = False
+                    # 立即重试，不增加重试计数
+                elif self.manual_reconnect_requested:
                     # 手动重连请求处理
                     self.connection_error.emit("正在手动重连...")
                     self.manual_reconnect_requested = False
@@ -90,8 +104,8 @@ class HeartRateWorker(QThread):
         self.scanning_status.emit("正在扫描心率设备...")
         logger.info("开始扫描心率设备")
         
-        # 优先尝试重新连接到上次成功连接的设备
-        if self.last_device_address:
+        # 如果不是完全扫描请求，则优先尝试重新连接到上次成功连接的设备
+        if self.last_device_address and not self.full_scan_requested:
             self.scanning_status.emit(f"尝试重连到上次设备: {self.last_device_address}")
             logger.info(f"尝试重连到上次设备: {self.last_device_address}")
             
@@ -102,7 +116,10 @@ class HeartRateWorker(QThread):
                     return  # 重连成功，直接返回
             except Exception as e:
                 logger.warning(f"重连到上次设备失败: {str(e)}")
-        
+        elif self.full_scan_requested:
+            # 完全扫描模式，不使用上次设备地址
+            logger.info("执行完全扫描模式")
+            
         # 扫描所有设备
         devices = await BleakScanner.discover()
         heart_rate_devices = [device for device in devices if self.is_heart_rate_device(device)]
@@ -208,6 +225,109 @@ class HeartRateWorker(QThread):
             logger.error(f"处理心率数据时出错: {str(e)}")
 
 
+class AnimatedHeartWidget(QWidget):
+    """心形动画组件"""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.heart_size = 100  # 心形初始大小
+        self.heart_beat_animation = False  # 是否正在跳动
+        self.animation_progress = 0  # 动画进度
+        self.beat_timer = None  # 跳动计时器
+        self.heart_color = QColor(255, 0, 0)  # 心形颜色
+        self.is_connected = False  # 连接状态
+        
+        # 设置组件大小
+        self.setMinimumSize(150, 150)
+        
+    def set_heart_rate(self, heart_rate):
+        """设置心率值并触发跳动动画"""
+        # 触发跳动动画
+        if self.is_connected and not self.heart_beat_animation:
+            self.start_beat_animation()
+            
+            # 根据心率调整颜色
+            if heart_rate > 100:
+                self.heart_color = QColor(255, 0, 0)  # 红色
+            elif heart_rate > 80:
+                self.heart_color = QColor(255, 165, 0)  # 橙色
+            else:
+                self.heart_color = QColor(0, 255, 0)  # 绿色
+        
+        self.update()  # 触发重绘
+    
+    def set_connected(self, connected):
+        """设置连接状态"""
+        self.is_connected = connected
+        if not connected:
+            self.heart_color = QColor(100, 100, 100)  # 灰色表示未连接
+        self.update()
+    
+    def start_beat_animation(self):
+        """开始跳动动画"""
+        self.heart_beat_animation = True
+        self.animation_progress = 0
+        
+        if self.beat_timer is None or not self.beat_timer.isActive():
+            self.beat_timer = QTimer(self)
+            self.beat_timer.timeout.connect(self.update_beat_animation)
+            self.beat_timer.start(20)  # 每20ms更新一次
+    
+    def update_beat_animation(self):
+        """更新跳动动画进度"""
+        # 更新动画进度
+        self.animation_progress += 0.05
+        
+        # 计算当前大小（使用正弦函数模拟跳动效果）
+        if self.animation_progress < 1.0:
+            # 跳动放大阶段
+            scale_factor = 1.0 + 0.2 * math.sin(self.animation_progress * math.pi)
+        else:
+            # 恢复原始大小
+            scale_factor = 1.0 - 0.2 * math.sin((self.animation_progress - 1.0) * math.pi)
+            
+            # 动画结束
+            if self.animation_progress >= 2.0:
+                self.heart_beat_animation = False
+                self.beat_timer.stop()
+                scale_factor = 1.0
+        
+        # 更新心形大小
+        self.heart_size = 100 * scale_factor
+        
+        # 触发重绘
+        self.update()
+    
+    def paintEvent(self, event):
+        """绘制心形"""
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)  # 启用抗锯齿
+        
+        # 获取窗口中心点
+        center_x = self.width() // 2
+        center_y = self.height() // 2
+        
+        # 计算心形顶点坐标
+        size = self.heart_size
+        points = []
+        
+        # 使用参数方程绘制心形
+        for angle in range(0, 361):
+            t = math.radians(angle)
+            x = 16 * math.pow(math.sin(t), 3)
+            y = 13 * math.cos(t) - 5 * math.cos(2*t) - 2 * math.cos(3*t) - math.cos(4*t)
+            
+            # 缩放和位移，并转换为整数
+            x_coord = int(center_x + x * size / 32)
+            y_coord = int(center_y - y * size / 32)
+            points.append(QPoint(x_coord, y_coord))
+        
+        # 绘制心形
+        brush = QBrush(self.heart_color)
+        painter.setBrush(brush)
+        painter.setPen(QPen(self.heart_color, 2))
+        painter.drawPolygon(points)
+
+
 class HeartRateWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -216,6 +336,7 @@ class HeartRateWindow(QMainWindow):
         self.last_position = None  # 记住窗口最后位置
         self.heart_rate_history = []  # 存储心率历史数据
         self.max_history_points = 30  # 最大历史数据点数
+        self.current_heart_rate = 0  # 当前心率值
         
         self.init_ui()
         self.init_worker()
@@ -227,7 +348,7 @@ class HeartRateWindow(QMainWindow):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         
         # 设置窗口大小
-        self.setFixedSize(300, 200)
+        self.setFixedSize(300, 300)  # 增加窗口高度以容纳心形动画
         
         # 创建中央部件
         central_widget = QWidget()
@@ -237,6 +358,11 @@ class HeartRateWindow(QMainWindow):
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(10, 10, 10, 10)
         central_widget.setLayout(main_layout)
+        
+        # 创建心形动画组件
+        self.heart_widget = AnimatedHeartWidget()
+        self.heart_widget.setFixedSize(150, 150)
+        main_layout.addWidget(self.heart_widget, alignment=Qt.AlignmentFlag.AlignCenter)
         
         # 创建心率显示标签
         self.heart_rate_label = QLabel("等待心率数据...")
@@ -270,14 +396,14 @@ class HeartRateWindow(QMainWindow):
         )
         self.top_button.clicked.connect(self.toggle_always_on_top)
         
-        # 创建重连按钮
-        self.reconnect_button = QPushButton("重连")
-        self.reconnect_button.setFont(QFont("Arial", 8))
-        self.reconnect_button.setStyleSheet(
+        # 创建重新扫描按钮（原重连按钮，现在更名为重新扫描）
+        self.rescan_button = QPushButton("重新扫描")
+        self.rescan_button.setFont(QFont("Arial", 8))
+        self.rescan_button.setStyleSheet(
             "background-color: #555555; color: white; border: none; padding: 3px;"
         )
-        self.reconnect_button.clicked.connect(self.manual_reconnect)
-        self.reconnect_button.setVisible(False)  # 默认隐藏重连按钮
+        self.rescan_button.clicked.connect(self.manual_rescan)
+        self.rescan_button.setVisible(False)  # 默认隐藏重新扫描按钮
         
         # 创建关闭按钮
         close_button = QPushButton("×")
@@ -290,7 +416,7 @@ class HeartRateWindow(QMainWindow):
         # 添加按钮到布局
         button_layout.addStretch()
         button_layout.addWidget(self.top_button)
-        button_layout.addWidget(self.reconnect_button)
+        button_layout.addWidget(self.rescan_button)
         button_layout.addWidget(close_button)
         
         # 添加部件到主布局
@@ -313,7 +439,7 @@ class HeartRateWindow(QMainWindow):
         self.worker.scanning_status.connect(self.update_status)
         self.worker.connection_error.connect(self.handle_error)
         self.worker.disconnected.connect(self.handle_disconnected)
-        self.worker.connection_success.connect(self.handle_connection_success)  # 新增连接成功信号处理
+        self.worker.connection_success.connect(self.handle_connection_success)
         self.worker.start()
         
     def setup_auto_hide(self):
@@ -337,6 +463,7 @@ class HeartRateWindow(QMainWindow):
             
     def update_heart_rate(self, heart_rate, sensor_contact):
         # 更新心率显示
+        self.current_heart_rate = heart_rate
         self.heart_rate_label.setText(f"{heart_rate}")
         
         # 根据心率值设置不同颜色
@@ -354,6 +481,9 @@ class HeartRateWindow(QMainWindow):
         else:
             self.contact_label.setText("传感器接触不良")
             self.contact_label.setStyleSheet("color: orange;")
+        
+        # 更新心形动画
+        self.heart_widget.set_heart_rate(heart_rate)
         
         # 更新心率历史数据
         self.update_heart_rate_history(heart_rate)
@@ -373,27 +503,30 @@ class HeartRateWindow(QMainWindow):
         self.status_label.setText(error)
         # 心率值保持不变，仅更新颜色表示错误状态
         self.heart_rate_label.setStyleSheet("color: #666666;")
-        # 显示重连按钮
-        self.reconnect_button.setVisible(True)
+        self.heart_widget.set_connected(False)
+        # 显示重新扫描按钮
+        self.rescan_button.setVisible(True)
         
     def handle_disconnected(self):
         # 处理设备断开连接
         self.status_label.setText("设备已断开")
         self.heart_rate_label.setStyleSheet("color: #666666;")
         self.contact_label.setText("")
-        # 显示重连按钮
-        self.reconnect_button.setVisible(True)
+        self.heart_widget.set_connected(False)
+        # 显示重新扫描按钮
+        self.rescan_button.setVisible(True)
         
     def handle_connection_success(self):
         """处理连接成功事件"""
         self.status_label.setText("已成功连接到设备")
-        self.reconnect_button.setVisible(False)  # 连接成功后隐藏重连按钮
+        self.heart_widget.set_connected(True)
+        self.rescan_button.setVisible(False)  # 连接成功后隐藏重新扫描按钮
         
-    def manual_reconnect(self):
-        """手动重连设备"""
-        self.status_label.setText("正在手动重连...")
-        self.reconnect_button.setVisible(False)  # 隐藏重连按钮
-        self.worker.request_manual_reconnect()
+    def manual_rescan(self):
+        """手动重新扫描设备"""
+        self.status_label.setText("正在重新扫描设备...")
+        self.rescan_button.setVisible(False)  # 隐藏重新扫描按钮
+        self.worker.request_full_scan()
         
     def mousePressEvent(self, event):
         # 实现窗口拖动
